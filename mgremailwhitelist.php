@@ -86,25 +86,28 @@ class ManageEMailWhitelist {
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 
 
-		$table_name = $wpdb->prefix . 'mgremailwhitelist_companies';
-		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+		$table_companies = $wpdb->prefix . 'mgremailwhitelist_companies';
+		$sql = "CREATE TABLE IF NOT EXISTS $table_companies (
         		company_id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
         		company_name varchar(50) NOT NULL) $charset_collate;";
 		dbDelta( $sql );
 
 
 		$table_name = $wpdb->prefix . 'mgremailwhitelist_companyadmins';
+		$table_wp_users = $wpdb->prefix . 'users';
 		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
 			company_id bigint(20) NOT NULL,
-			wp_userid  bigint(20) NOT NULL,
+			wp_userid  bigint(20) unsigned NOT NULL,
+			FOREIGN KEY (company_id) REFERENCES $table_companies (company_id),
 			PRIMARY KEY (company_id,wp_userid) ) $charset_collate;";
 		dbDelta( $sql );
-
 
 		$table_name = $wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
 		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
 			email_id varchar(50) NOT NULL PRIMARY KEY,
-			company_id bigint(20) NOT NULL) $charset_collate;";
+			company_id bigint(20) NOT NULL,
+			FOREIGN KEY (company_id) REFERENCES $table_companies (company_id)
+			) $charset_collate;";
 		dbDelta( $sql );
 	}
 

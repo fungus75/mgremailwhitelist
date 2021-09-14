@@ -57,6 +57,15 @@ class ManageEMailWhitelist {
 
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		register_activation_hook( __FILE__, array( $this, 'activation' ) );
+		register_deactivation_hook( __FILE__, array( $this, 'deactivation' ) );
+
+	}
+
+	/**
 	 * Include required files.
 	 *
 	 * @return void
@@ -97,5 +106,16 @@ class ManageEMailWhitelist {
 			email_id varchar(50) NOT NULL PRIMARY KEY,
 			company_id bigint(20) NOT NULL) $charset_collate;";
 		dbDelta( $sql );
+	}
+
+
+	/**
+	 * Plugin Activation
+	 *
+	 * @return void
+	 */
+	public function activation() {
+		$this->createTables();
+
 	}
 

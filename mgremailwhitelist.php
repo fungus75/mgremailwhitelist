@@ -96,7 +96,7 @@ class ManageEMailWhitelist {
 		$table_name = $wpdb->prefix . 'mgremailwhitelist_companyadmins';
 		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
 			company_id bigint(20) NOT NULL,
-			wp_userid  bigint(20) NOT NULL
+			wp_userid  bigint(20) NOT NULL,
 			PRIMARY KEY (company_id,wp_userid) ) $charset_collate;";
 		dbDelta( $sql );
 
@@ -120,4 +120,21 @@ class ManageEMailWhitelist {
 	}
 
 }
+
+
+
+/**
+ * Initialize plugIn.
+ */
+function ManageEMailWhitelist() {
+        static $instance;
+
+        // first call to instance() initializes the plugin
+        if ( $instance === null || ! ( $instance instanceof ManageEMailWhitelist ) )
+                $instance = ManageEMailWhitelist::instance();
+
+        return $instance;
+}
+
+$manage_email_whitelist = ManageEMailWhitelist();
 

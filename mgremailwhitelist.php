@@ -65,3 +65,37 @@ class ManageEMailWhitelist {
 		// include_once( plugin_dir_path( __FILE__ ) . 'includes/bot-detect.php' );
 	}
 
+
+	/**
+	 * Create Tables
+	 *
+	 * @return void
+	 */
+	private function createTables() {
+		global $wpdb;
+		$charset_collate = $wpdb->get_charset_collate();
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
+
+		$table_name = $wpdb->prefix . 'mgremailwhitelist_companies';
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        		company_id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        		company_name varchar(50) NOT NULL) $charset_collate;";
+		dbDelta( $sql );
+
+
+		$table_name = $wpdb->prefix . 'mgremailwhitelist_companyadmins';
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+			company_id bigint(20) NOT NULL,
+			wp_userid  bigint(20) NOT NULL
+			PRIMARY KEY (company_id,wp_userid) ) $charset_collate;";
+		dbDelta( $sql );
+
+
+		$table_name = $wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+			email_id varchar(50) NOT NULL PRIMARY KEY,
+			company_id bigint(20) NOT NULL) $charset_collate;";
+		dbDelta( $sql );
+	}
+

@@ -155,6 +155,30 @@ class ManageEMailWhitelist {
 	}
 
 
+	// Settings page
+	function settings_page() {
+		echo "<div class='wrap'>
+			<h2>".esc_html__( 'ManageEMailWhitelist Settings', 'syntaxhighlighter' )."</h2>
+		     ";
+	}
+
+
+	// Dashboard
+	public function wpew_init_dashboard_widget() {
+		wp_add_dashboard_widget(
+			'mgremail_dash',
+			'<span contenteditable="true" class="wpdn-title">E-Mail Whitelist</span><div class="wpdn-edit-title"></div><span class="status"></span>',
+			array( $this, 'wpew_render_dashboard_widget' ),
+			''
+		);
+	}
+
+
+	public function wpew_render_dashboard_widget( $post, $args ) {
+		echo "Something fancy<br>";
+		echo "Another fancy";
+	}
+
 
 
 }
@@ -180,4 +204,5 @@ $manage_email_whitelist = ManageEMailWhitelist();
 add_filter('plugin_action_links', array($manage_email_whitelist, 'add_settings_link'), 10, 2);
 add_action('admin_init', array( $manage_email_whitelist, 'register_setting' ) );
 add_action('admin_menu', array( $manage_email_whitelist, 'register_settings_page' ) );
+add_action('wp_dashboard_setup', array( $manage_email_whitelist, 'wpew_init_dashboard_widget'));
 

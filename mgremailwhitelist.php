@@ -122,6 +122,41 @@ class ManageEMailWhitelist {
 
 	}
 
+        /**
+         * Add Settings link to plugins - code from GD Star Ratings
+         *
+         * @wp-filter  plugin_action_links
+         * @param  array   $links
+         * @param  string  $file
+         * @return array
+         */
+        public function add_settings_link($links, $file) {
+                static $this_plugin;
+                if (!$this_plugin) {
+                        $this_plugin = plugin_basename(__FILE__);
+                }
+
+                if ($file == $this_plugin) {
+                        $settings_link = '<a href="'.esc_url(admin_url('options-general.php?page=mgremailwhitelist')).'">'.__('Settings', 'mgremailwhitelist').'</a>';
+                        array_unshift($links, $settings_link);
+                }
+                return $links;
+        }
+
+	// Register the settings page
+	function register_settings_page() {
+		add_options_page( __( 'ManageEMailWhitelist Settings', 'mgremailwhitelist' ), __( 'ManageEMailWhitelist', 'mgremailwhitelist' ), 'manage_options', 'mgremailwhitelist', array( $this, 'settings_page' ) );
+	}
+
+
+	// Register the plugin's setting
+	function register_setting() {
+		register_setting( 'mgremailwhitelist_settings', 'mgremailwhitelist_settings', array( $this, 'validate_settings' ) );
+	}
+
+
+
+
 }
 
 
@@ -140,4 +175,9 @@ function ManageEMailWhitelist() {
 }
 
 $manage_email_whitelist = ManageEMailWhitelist();
+
+// add settings
+add_filter('plugin_action_links', array($manage_email_whitelist, 'add_settings_link'), 10, 2);
+add_action('admin_init', array( $manage_email_whitelist, 'register_setting' ) );
+add_action('admin_menu', array( $manage_email_whitelist, 'register_settings_page' ) );
 

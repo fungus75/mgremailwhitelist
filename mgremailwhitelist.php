@@ -158,7 +158,7 @@ class ManageEMailWhitelist {
 	// Settings page
 	function settings_page() {
 		echo "<div class='wrap'>
-			<h2>".esc_html__( 'ManageEMailWhitelist Settings', 'syntaxhighlighter' )."</h2>
+			<h2>".esc_html__( 'ManageEMailWhitelist Settings', 'mgremailwhitelist' )."</h2>
 		     ";
 	}
 
@@ -175,8 +175,34 @@ class ManageEMailWhitelist {
 
 
 	public function wpew_render_dashboard_widget( $post, $args ) {
-		echo "Something fancy<br>";
-		echo "Another fancy";
+		global $wpdb;
+		$current_user_id = get_current_user_id();
+		$cmpMailAcc=$wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
+		$cmpAdmins =$wpdb->prefix . 'mgremailwhitelist_companyadmins';
+
+		$emails=$wpdb->get_results( 
+    			"
+				SELECT email_id
+				FROM  $cmpMailAcc, $cmpAdmins
+				WHERE $cmpMailAcc.company_id = $cmpAdmins.company_id
+				AND   $cmpAdmins.wp_userid   = $current_user_id
+				ORDER BY email_id
+    			"
+		);
+		echo esc_html__('Select email for E-Mail Whitelist','mgremailwhitelist')."<br/>";
+		echo "<form action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
+			<input type='hidden' name='cp_action' value='wpew_user_data'>
+			<select name='emails'>";
+	
+		foreach ( $emails as $oneEmail ) {
+    			echo "<option value='".esc_html($oneEmail->email_id)."'>".esc_html($oneEmail->email_id)."</option>";
+		}
+		echo "</select>";
+		wp_nonce_field( 'wpew_nonce', 'wpew_nonce_field');
+		echo "	<br class='clear'>
+			<input name='save-data' class='button button-primary' value='Save' type='submit'>
+			</form>";
+
 	}
 
 

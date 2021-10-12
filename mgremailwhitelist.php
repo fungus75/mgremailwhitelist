@@ -239,7 +239,7 @@ class ManageEMailWhitelist {
 			file_put_contents($fname,$email);
 
         		// success message
-        		$msg = 'EMail '.$email.' whitelisted!';
+        		$msg = 'In one minute: EMail '.$email.' whitelisted!';
     		}
     		else
     		{   

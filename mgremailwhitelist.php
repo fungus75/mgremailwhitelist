@@ -21,6 +21,28 @@ if ( ! defined( 'ABSPATH' ) )
 
 
 /**
+ * Add javascript
+ */
+function wpew_add_script($hook){
+    
+    // add JS-File only on the dashboard page
+    if ('index.php' !== $hook) {
+        return;
+    }
+    
+    wp_enqueue_script( 'wpew_widget_script', plugin_dir_url(__FILE__) ."/js/widget-script.js", array(), NULL, true );
+}
+
+/**
+ * hook to add js
+ */
+add_action( 'admin_enqueue_scripts', 'wpew_add_script' );
+
+
+
+
+
+/**
  * Manage eMail Whitelist main class
  *
  * @class ManageEMailWhitelist
@@ -190,9 +212,9 @@ class ManageEMailWhitelist {
     			"
 		);
 		echo esc_html__('Select email for E-Mail Whitelist','mgremailwhitelist')."<br/>";
-		echo "<form action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
-			<input type='hidden' name='cp_action' value='wpew_user_data'>
-			<select name='emails'>";
+		echo "<form id='wpew_form' action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
+			<input type='hidden' id='wpew_action' name='wpew_action' value='wpew_user_data'>
+			<select name='wpew_email' id='wpew_email'>";
 	
 		foreach ( $emails as $oneEmail ) {
     			echo "<option value='".esc_html($oneEmail->email_id)."'>".esc_html($oneEmail->email_id)."</option>";
@@ -200,11 +222,33 @@ class ManageEMailWhitelist {
 		echo "</select>";
 		wp_nonce_field( 'wpew_nonce', 'wpew_nonce_field');
 		echo "	<br class='clear'>
-			<input name='save-data' class='button button-primary' value='Save' type='submit'>
+			<input name='save-data' class='button button-primary' value='Whitelist' type='submit'>
 			</form>";
 
 	}
 
+
+	public function wpew_save_user_data() {
+    		$msg = '';
+    		if(array_key_exists('nonce', $_POST) AND  wp_verify_nonce( $_POST['nonce'], 'wpew_nonce' ) ) 
+    		{   
+        		$email=esc_html($_POST['email']);
+        
+			$folder='/home/fungusat/tmp/emailWhitelist';
+			$fname=tempnam($folder,'emailWhitelist');
+			file_put_contents($fname,$email);
+
+        		// success message
+        		$msg = 'EMail '.$email.' whitelisted!';
+    		}
+    		else
+    		{   
+        		// error message
+        		$msg = 'EMail could not be whitelisted!';
+    		}
+   
+    		wp_send_json( $msg );
+	}
 
 
 }
@@ -231,4 +275,4 @@ add_filter('plugin_action_links', array($manage_email_whitelist, 'add_settings_l
 add_action('admin_init', array( $manage_email_whitelist, 'register_setting' ) );
 add_action('admin_menu', array( $manage_email_whitelist, 'register_settings_page' ) );
 add_action('wp_dashboard_setup', array( $manage_email_whitelist, 'wpew_init_dashboard_widget'));
-
+add_action('wp_ajax_wpew_user_data', array( $manage_email_whitelist,'wpew_save_user_data') );

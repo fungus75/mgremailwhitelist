@@ -15,6 +15,10 @@
  * Domain Path:       /languages
  */
 
+// Many of the code was inspired by
+//     - https://github.com/user141080/admindashboardwidget
+//     - https://github.com/Automattic/syntaxhighlighter
+
 // exit if accessed directly
 if ( ! defined( 'ABSPATH' ) )
         exit;

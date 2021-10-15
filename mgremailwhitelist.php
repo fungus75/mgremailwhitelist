@@ -28,12 +28,6 @@ if ( ! defined( 'ABSPATH' ) )
  * Add javascript
  */
 function wpew_add_script($hook){
-    
-    // add JS-File only on the dashboard page
-    if ('index.php' !== $hook) {
-        return;
-    }
-    
     wp_enqueue_script( 'wpew_widget_script', plugin_dir_url(__FILE__) ."/js/widget-script.js", array(), NULL, true );
 }
 
@@ -186,6 +180,26 @@ class ManageEMailWhitelist {
 		echo "<div class='wrap'>
 			<h2>".esc_html__( 'ManageEMailWhitelist Settings', 'mgremailwhitelist' )."</h2>
 		     ";
+
+		global $wpdb;
+		$cmpMailAccTable=$wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
+		$cmpAdminTable  =$wpdb->prefix . 'mgremailwhitelist_companyadmins';
+		$compTable      =$wpdb->prefix . 'mgremailwhitelist_companies';
+
+
+		
+
+		echo esc_html__('Companies','mgremailwhitelist')."<br/>";
+		echo "<form id='wpew_company_form' action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
+                        <input type='hidden' id='wpew_company_action' name='wpew_company_action' value='wpew_company_data'>
+                        <select name='wpew_company_id' id='wpew_company_id' size='5'>
+			</select>";
+		wp_nonce_field( 'wpew_nonce', 'wpew_nonce_field');
+		echo "  <br class='clear'>
+			<input id='wpew_company_newname' type='text' size='20' />
+                        <input name='save-data' class='button button-primary' value='Add Company' type='submit'>
+                        </form>";
+		
 	}
 
 

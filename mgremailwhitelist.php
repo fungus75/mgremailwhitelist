@@ -187,18 +187,17 @@ class ManageEMailWhitelist {
 		$compTable      =$wpdb->prefix . 'mgremailwhitelist_companies';
 
 
-		
-
 		echo esc_html__('Companies','mgremailwhitelist')."<br/>";
-		echo "<form id='wpew_company_form' action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
-                        <input type='hidden' id='wpew_company_action' name='wpew_company_action' value='wpew_company_data'>
+		echo "<form id='wpew_company_form' ajaxurl='".esc_url( admin_url( 'admin-ajax.php' ) )."' action='#' method='post'>
+			<input type='hidden' id='wpew_action' name='wpew_action' value='wpew_user_data'>
                         <select name='wpew_company_id' id='wpew_company_id' size='5'>
 			</select>";
 		wp_nonce_field( 'wpew_nonce', 'wpew_nonce_field');
 		echo "  <br class='clear'>
 			<input id='wpew_company_newname' type='text' size='20' />
-                        <input name='save-data' class='button button-primary' value='Add Company' type='submit'>
-                        </form>";
+                        <input id='wpew_company_addbutton' class='button button-primary' value='Add Company' type='submit'>
+                        </form>
+			<script> jQuery( window ).load(function() { wpew_LoadCompanyInitial(); });</script>";
 		
 	}
 
@@ -230,7 +229,7 @@ class ManageEMailWhitelist {
     			"
 		);
 		echo esc_html__('Select email for E-Mail Whitelist','mgremailwhitelist')."<br/>";
-		echo "<form id='wpew_form' action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post'>
+		echo "<form id='wpew_form' action='".esc_url( admin_url( 'admin-ajax.php' ) )."' method='post' subact='dowhitelist'>
 			<input type='hidden' id='wpew_action' name='wpew_action' value='wpew_user_data'>
 			<select name='wpew_email' id='wpew_email'>";
 	
@@ -245,24 +244,58 @@ class ManageEMailWhitelist {
 
 	}
 
+	private function ajax_dowhitelist($email) {
+		$folder='/home/fungusat/tmp/emailWhitelist';
+		$fname=tempnam($folder,'emailWhitelist');
+		file_put_contents($fname,$email);
+		return 'In one minute: EMail '.$email.' whitelisted!';
+	}
+
+	private function ajax_getCompanies() {
+		global $wpdb;
+		$compTable      =$wpdb->prefix . 'mgremailwhitelist_companies';
+		
+		$companies = $wpdb->get_results(
+                        "
+				SELECT company_id, company_name
+				FROM $compTable
+				ORDER BY company_name
+			"
+		);
+
+		$ret="";
+		foreach ($companies as $company) {
+			$ret.="<option value='".$company->company_id."'>".esc_html($company->company_name)."</option>";
+		}
+		return $ret;
+	}
+
+	private function ajax_addCompany() {
+		$companyName=trim($_POST["payload"]);
+		if ($copmanyName=="") return "";
+
+		global $wpdb;
+		$result=$wpdb->insert(
+			$wpdb->prefix . 'mgremailwhitelist_companies',
+			array("company_name"=>$companyName),
+			array('%s')
+		);
+		return $result;
+	}
 
 	public function wpew_save_user_data() {
     		$msg = '';
+		$subact= $_POST['subact'];
     		if(array_key_exists('nonce', $_POST) AND  wp_verify_nonce( $_POST['nonce'], 'wpew_nonce' ) ) 
     		{   
-        		$email=esc_html($_POST['email']);
-        
-			$folder='/home/fungusat/tmp/emailWhitelist';
-			$fname=tempnam($folder,'emailWhitelist');
-			file_put_contents($fname,$email);
-
-        		// success message
-        		$msg = 'In one minute: EMail '.$email.' whitelisted!';
+			if ($subact=='dowhitelist') $msg=$this->ajax_dowhitelist(esc_html($_POST['email']));
+			if ($subact=='getCompanies') $msg=$this->ajax_getCompanies();
+			if ($subact=='addCompany') $msg=$this->ajax_addCompany();
     		}
     		else
     		{   
         		// error message
-        		$msg = 'EMail could not be whitelisted!';
+        		$msg = 'Error!';
     		}
    
     		wp_send_json( $msg );

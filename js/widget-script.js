@@ -50,7 +50,8 @@ function wpew_AjaxLoadAndReplace(element,subact,payload) {
 
 function wpew_company_changed() {
 	var companySelected=jQuery("#wpew_company_id").val();
-	alert("Company Selected:"+companySelected);
+	wpew_AjaxLoadAndReplace(jQuery("#wpew_company_admins"),'getCompanyAdmins',companySelected);
+	wpew_AjaxLoadAndReplace(jQuery("#wpew_company_members"),'getCompanyMembers',companySelected);
 }
 
 function wpew_company_addbutton() {
@@ -58,10 +59,38 @@ function wpew_company_addbutton() {
 	wpew_AjaxLoadAndReplace(wpew_LoadCompanyInitial,'addCompany',newCompany);
 }
 
+function wpew_company_admins_savebutton() {
+	var companySelected=jQuery("#wpew_company_id").val();
+	if (isNaN(companySelected) || companySelected == null) {
+		alert("Please select company first");
+		return;
+	}
+	var admins=jQuery("#wpew_company_admins").val();
+	var payload=companySelected+"=";
+	for (var i=0;i<admins.length;i++) {
+		if (i>0) payload+=",";
+		payload+=admins[i];
+	}
+	wpew_AjaxLoadAndReplace(wpew_LoadCompanyInitial,'setCompanyAdmins',payload);
+}
+
+function wpew_company_member_addbutton() {
+	var companySelected=jQuery("#wpew_company_id").val();
+	if (isNaN(companySelected) || companySelected == null) {
+		alert("Please select company first");
+		return;
+	}
+	var payload=companySelected+"="+jQuery("#wpew_company_member_newmail").val();
+	wpew_AjaxLoadAndReplace(wpew_LoadCompanyInitial,'addCompanyMember',payload);
+}
+
+
 function wpew_LoadCompanyInitial() {
 	// initialize some buttons
 	jQuery("#wpew_company_addbutton").click(wpew_company_addbutton);
 	jQuery("#wpew_company_id").change(wpew_company_changed);
+	jQuery("#wpew_company_admins_savebutton").click(wpew_company_admins_savebutton);
+	jQuery("#wpew_company_member_addbutton").click(wpew_company_member_addbutton);
 
 	return wpew_AjaxLoadAndReplace(jQuery("#wpew_company_id"),'getCompanies',null);
 }

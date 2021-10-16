@@ -256,6 +256,25 @@ class ManageEMailWhitelist {
 	}
 
 	private function ajax_dowhitelist($email) {
+		// Security: test if user has permission for that email
+		global $wpdb;
+		$current_user_id = get_current_user_id();
+		$cmpMailAcc=$wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
+		$cmpAdmins =$wpdb->prefix . 'mgremailwhitelist_companyadmins';
+		$check=$wpdb->get_var(
+			$wpdb->prepare(
+				"
+					SELECT email_id
+					FROM  $cmpMailAcc, $cmpAdmins
+					WHERE $cmpMailAcc.company_id = $cmpAdmins.company_id
+					AND   $cmpAdmins.wp_userid   = $current_user_id
+					AND   email_id = %s
+				",array($email)
+			)
+		);
+
+		if ($check!=$email) return "Unknown Error";
+
 		$folder='/home/fungusat/tmp/emailWhitelist';
 		$fname=tempnam($folder,'emailWhitelist');
 		file_put_contents($fname,$email);

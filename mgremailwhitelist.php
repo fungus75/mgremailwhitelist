@@ -387,6 +387,10 @@ class ManageEMailWhitelist {
     		if(array_key_exists('nonce', $_POST) AND  wp_verify_nonce( $_POST['nonce'], 'wpew_nonce' ) ) 
     		{   
 			if ($subact=='dowhitelist') $msg=$this->ajax_dowhitelist(esc_html($_POST['email']));
+
+			// for this you need to be admin
+			if (!current_user_can('administrator')) return;
+
 			if ($subact=='getCompanies') $msg=$this->ajax_getCompanies();
 			if ($subact=='addCompany') $msg=$this->ajax_addCompany();
 			if ($subact=='getCompanyAdmins') $msg=$this->ajax_getCompanyAdmins($_POST["payload"]+0);

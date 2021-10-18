@@ -408,14 +408,15 @@ class ManageEMailWhitelist {
 			if ($subact=='dowhitelist') $msg=$this->ajax_dowhitelist(esc_html($_POST['email']));
 
 			// for this you need to be admin
-			if (!current_user_can('administrator')) return;
+			if (current_user_can('administrator')) {
 
-			if ($subact=='getCompanies') $msg=$this->ajax_getCompanies();
-			if ($subact=='addCompany') $msg=$this->ajax_addCompany();
-			if ($subact=='getCompanyAdmins') $msg=$this->ajax_getCompanyAdmins($_POST["payload"]+0);
-			if ($subact=='setCompanyAdmins') $msg=$this->ajax_setCompanyAdmins($_POST["payload"]);
-			if ($subact=='getCompanyMembers') $msg=$this->ajax_getCompanyMembers($_POST["payload"]+0);
-			if ($subact=='addCompanyMember') $msg=$this->ajax_addCompanyMember($_POST["payload"]);
+				if ($subact=='getCompanies') $msg=$this->ajax_getCompanies();
+				if ($subact=='addCompany') $msg=$this->ajax_addCompany();
+				if ($subact=='getCompanyAdmins') $msg=$this->ajax_getCompanyAdmins($_POST["payload"]+0);
+				if ($subact=='setCompanyAdmins') $msg=$this->ajax_setCompanyAdmins($_POST["payload"]);
+				if ($subact=='getCompanyMembers') $msg=$this->ajax_getCompanyMembers($_POST["payload"]+0);
+				if ($subact=='addCompanyMember') $msg=$this->ajax_addCompanyMember($_POST["payload"]);
+			}
     		}
     		else
     		{   

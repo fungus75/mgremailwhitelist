@@ -56,6 +56,7 @@ function wpew_company_changed() {
 
 function wpew_company_addbutton() {
 	var newCompany=jQuery("#wpew_company_newname").val();
+	jQuery("#wpew_company_newname").val("");
 	wpew_AjaxLoadAndReplace(wpew_LoadCompanyInitial,'addCompany',newCompany);
 }
 
@@ -91,7 +92,13 @@ function wpew_LoadCompanyInitial() {
 	jQuery("#wpew_company_id").change(wpew_company_changed);
 	jQuery("#wpew_company_admins_savebutton").click(wpew_company_admins_savebutton);
 	jQuery("#wpew_company_member_addbutton").click(wpew_company_member_addbutton);
+	wpew_ClearSelectBoxes();
 
 	return wpew_AjaxLoadAndReplace(jQuery("#wpew_company_id"),'getCompanies',null);
+}
+
+function wpew_ClearSelectBoxes() {
+	jQuery("#wpew_company_admins").html("");
+	jQuery("#wpew_company_members").html("");
 }
 

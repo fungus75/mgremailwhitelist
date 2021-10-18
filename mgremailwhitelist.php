@@ -189,7 +189,7 @@ class ManageEMailWhitelist {
 		wp_nonce_field( 'wpew_nonce', 'wpew_nonce_field');
 		echo "  <br class='clear'>
 			<input id='wpew_company_newname' type='text' size='20' />
-                        <input id='wpew_company_addbutton' class='button button-primary' value='Add Company' type='submit'>
+                        <input id='wpew_company_addbutton' class='button button-primary' value='Add Company' >
 			<br />
 			<hr />
 			<br />";
@@ -197,7 +197,7 @@ class ManageEMailWhitelist {
 			<select name='wpew_company_admins' id='wpew_company_admins' size='5' multiple>
                         </select>
 			<br class='clear'>
-			<input id='wpew_company_admins_savebutton' class='button button-primary' value='Save Company Admins' type='submit'>
+			<input id='wpew_company_admins_savebutton' class='button button-primary' value='Save Company Admins' >
 			<br />
 			<hr />
 			<br />";
@@ -206,7 +206,7 @@ class ManageEMailWhitelist {
 			</select>
 			<br class='clear'>
 			<input id='wpew_company_member_newmail' type='text' size='20' />
-			<input id='wpew_company_member_addbutton' class='button button-primary' value='Add Member eMail' type='submit'>
+			<input id='wpew_company_member_addbutton' class='button button-primary' value='Add Member eMail' >
                         </form>
 			<script> jQuery( window ).load(function() { wpew_LoadCompanyInitial(); });</script>";
 		
@@ -300,9 +300,9 @@ class ManageEMailWhitelist {
 		return $ret;
 	}
 
-	private function ajax_addCompany() {
-		$companyName=trim($_POST["payload"]);
-		if ($copmanyName=="") return "";
+	private function ajax_addCompany($companyName) {
+		$companyName=trim($companyName);
+		if ($companyName=="") return "";
 
 		global $wpdb;
 		$result=$wpdb->insert(
@@ -401,7 +401,7 @@ class ManageEMailWhitelist {
 	}
 
 	public function wpew_save_user_data() {
-    		$msg = '';
+    		$msg = 'Unknown';
 		$subact= $_POST['subact'];
     		if(array_key_exists('nonce', $_POST) AND  wp_verify_nonce( $_POST['nonce'], 'wpew_nonce' ) ) 
     		{   
@@ -411,7 +411,7 @@ class ManageEMailWhitelist {
 			if (current_user_can('administrator')) {
 
 				if ($subact=='getCompanies') $msg=$this->ajax_getCompanies();
-				if ($subact=='addCompany') $msg=$this->ajax_addCompany();
+				if ($subact=='addCompany') $msg=$this->ajax_addCompany($_POST["payload"]);
 				if ($subact=='getCompanyAdmins') $msg=$this->ajax_getCompanyAdmins($_POST["payload"]+0);
 				if ($subact=='setCompanyAdmins') $msg=$this->ajax_setCompanyAdmins($_POST["payload"]);
 				if ($subact=='getCompanyMembers') $msg=$this->ajax_getCompanyMembers($_POST["payload"]+0);

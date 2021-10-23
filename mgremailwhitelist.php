@@ -191,6 +191,7 @@ class ManageEMailWhitelist {
 			<input id='wpew_company_newname' type='text' size='20' />
                         <input id='wpew_company_addbutton' class='button button-primary' value='Add Company' >
 			<br />
+			<input id='wpew_company_remutton' class='button button-primary' value='Remove sel. Company' >
 			<hr />
 			<br />";
 		echo esc_html__('Company Admins','mgremailwhitelist')."<br/>
@@ -207,6 +208,8 @@ class ManageEMailWhitelist {
 			<br class='clear'>
 			<input id='wpew_company_member_newmail' type='text' size='20' />
 			<input id='wpew_company_member_addbutton' class='button button-primary' value='Add Member eMail' >
+			<br />
+			<input id='wpew_company_member_rembutton' class='button button-primary' value='Remove sel. eMail' >
                         </form>
 			<script> jQuery( window ).load(function() { wpew_LoadCompanyInitial(); });</script>";
 		
@@ -313,6 +316,18 @@ class ManageEMailWhitelist {
 		return $result;
 	}
 
+	private function ajax_remCompany($companyId) {
+		global $wpdb;
+		$compTable=$wpdb->prefix . 'mgremailwhitelist_companies';
+		if (!$wpdb->delete(
+			$compTable,
+			array("company_id"=>$companyId),
+			array('%d')
+		)) return "false";
+		return "true";
+	}
+
+
 	private function ajax_getCompanyAdmins($copmanyId) {
 		global $wpdb;
 		$cmpAdminTable  =$wpdb->prefix . 'mgremailwhitelist_companyadmins';
@@ -360,8 +375,6 @@ class ManageEMailWhitelist {
 		return $ret;
 	}
 
-		
-
 	private function ajax_setCompanyAdmins($payload) {
 		// payload is in format companyid = admin1, admin2, ...
 		// split at =
@@ -373,6 +386,7 @@ class ManageEMailWhitelist {
 		$cmpAdminTable  =$wpdb->prefix . 'mgremailwhitelist_companyadmins';
 		$wpdb->delete($cmpAdminTable,array('company_id'=>$companyId));		// delete all old admins
 		foreach($adminIds as $oneAdmin) {
+			if (($oneAdmin+0)==0) continue;
 			if (!$wpdb->insert(
 				$cmpAdminTable,
 				array("company_id"=>$companyId, "wp_userid"=> ($oneAdmin+0)),
@@ -400,6 +414,24 @@ class ManageEMailWhitelist {
 		return "true";
 	}
 
+	private function ajax_remCompanyMember($payload) {
+		// payload is in format companyid = email
+		// split at first equal sign
+		$pos=strpos($payload,"=");
+		if (!$pos) return "false";
+
+		$companyId=substr($payload,0,$pos)+0;
+		$email=trim(substr($payload,$pos+1));
+		global $wpdb;
+		$cmpMailAccTable=$wpdb->prefix . 'mgremailwhitelist_companymailaccounts';
+		if (!$wpdb->delete(
+			$cmpMailAccTable,
+			array("company_id"=>$companyId, "email_id"=>$email),
+			array('%d','%s')
+		)) return "false";
+		return "true";
+	}
+
 	public function wpew_save_user_data() {
     		$msg = 'Unknown';
 		$subact= $_POST['subact'];
@@ -416,6 +448,8 @@ class ManageEMailWhitelist {
 				if ($subact=='setCompanyAdmins') $msg=$this->ajax_setCompanyAdmins($_POST["payload"]);
 				if ($subact=='getCompanyMembers') $msg=$this->ajax_getCompanyMembers($_POST["payload"]+0);
 				if ($subact=='addCompanyMember') $msg=$this->ajax_addCompanyMember($_POST["payload"]);
+				if ($subact=='remCompanyMember') $msg=$this->ajax_remCompanyMember($_POST["payload"]);
+				if ($subact=='remCompany') $msg=$this->ajax_remCompany($_POST["payload"]+0);
 			}
     		}
     		else
